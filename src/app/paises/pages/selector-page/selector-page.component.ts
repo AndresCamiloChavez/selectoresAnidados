@@ -21,6 +21,7 @@ export class SelectorPageComponent implements OnInit {
   //llenar selectores
   regiones: string[] = [];
   paises: PaisSmall[] = [];
+  fronteras: string[] = [];
 
   ngOnInit(): void {
     this.regiones = this.paisesServices.regiones;
@@ -33,9 +34,15 @@ export class SelectorPageComponent implements OnInit {
         switchMap((resp: string) => this.paisesServices.getPaisesByRegion(resp)),
         ).subscribe(dataPaises => this.paises = dataPaises);
 
-        this.miFormulario.get('pais')?.valueChanges.subscribe(pais => {
-            console.log('valor del país', pais);
-            
+        this.miFormulario.get('pais')?.valueChanges.pipe(
+          tap((_)=>{
+              this.miFormulario.get('frontera')?.reset('')
+          }), 
+          switchMap(respPaisValueCode => {
+             return this.paisesServices.getPaisesByCode(respPaisValueCode); 
+          })
+        ).subscribe(pais => {
+          this.fronteras = pais?.borders ?? [];
         })
 
     // this.miFormulario.get('region')?.valueChanges.subscribe((regionValue) => {
